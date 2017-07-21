@@ -50,6 +50,30 @@ namespace BagOLoot
                         dbcmd.Dispose ();
                     }
                 }
+                try
+                {
+                    // Try to run the query. If it throws an exception, create the table
+                    dbcmd.CommandText = $"select id from toy";
+                    using (SqliteDataReader reader = dbcmd.ExecuteReader())
+                    {
+                        
+                    }
+                    dbcmd.Dispose ();
+                }
+                catch (Microsoft.Data.Sqlite.SqliteException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    if (ex.Message.Contains("no such table"))
+                    {
+                        dbcmd.CommandText = $@"create table toy (
+                            `id`	integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            `name`	varchar(80) not null, 
+                            `childId` integer
+                        )";
+                        dbcmd.ExecuteNonQuery ();
+                        dbcmd.Dispose ();
+                    }
+                }
                 _connection.Close ();
             }
         }

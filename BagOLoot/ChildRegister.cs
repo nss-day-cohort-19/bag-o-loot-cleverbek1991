@@ -8,6 +8,7 @@ namespace BagOLoot
     public class ChildRegister
     {
         private List<string> _children = new List<string>();
+        private Dictionary<int, string> _kids = new Dictionary<int, string>(); 
         private string _connectionString = $"Data Source={Environment.GetEnvironmentVariable("BAGOLOOT_DB")}";
         private SqliteConnection _connection;
 
@@ -48,9 +49,29 @@ namespace BagOLoot
             return _lastId != 0;
         }
 
-        public List<string> GetChildren ()
+        public Dictionary<int, string> GetChildren ()
         {
-            return new List<string>();
+            using (_connection)
+            {
+                _connection.Open ();
+                SqliteCommand dbcmd = _connection.CreateCommand();
+
+                // Get the name of all the children
+                dbcmd.CommandText = $"select id, name from Child";
+                dbcmd.ExecuteNonQuery ();
+                // Get all the names
+                using (SqliteDataReader dr = dbcmd.ExecuteReader()) 
+                {
+                    while(dr.Read()) {
+                        _kids.Add(Convert.ToInt32(dr[0]), dr[1].ToString()); //Add child NAME and ID to the list
+                    }
+                }
+
+                // clean up
+                dbcmd.Dispose ();
+                _connection.Close ();
+            }
+            return _kids;
         }
 
         public string GetChild (string name)
