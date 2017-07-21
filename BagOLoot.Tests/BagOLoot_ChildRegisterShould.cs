@@ -20,7 +20,7 @@ namespace BagOLoot.Tests
         public void AddChildren(string child)
         {
             var result = _register.AddChild(child);
-            Assert.True(result);
+            Assert.IsType<int>(result);
         }
 
         [Fact]
